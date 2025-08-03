@@ -119,7 +119,7 @@ func (s *Server) NewSequence(prompt string, images []llm.ImageData, params NewSe
 	}
 
 	// Ensure that at least 1 input can be discarded during shift
-	params.numKeep = min(params.numKeep, s.cache.numCtx-1)
+	params.numKeep = int32(min(int(params.numKeep), int(s.cache.numCtx-1)))
 
 	if int32(len(inputs)) > s.cache.numCtx {
 		discard := int32(len(inputs)) - s.cache.numCtx
@@ -302,6 +302,12 @@ type Server struct {
 	// multimodalHash generates hashes for comparing equality
 	// of non-text data
 	multimodalHash maphash.Hash
+}
+
+type RerankResult struct {
+	Index          int     `json:"index"`
+	Document       string  `json:"document,omitempty"`
+	RelevanceScore float64 `json:"relevance_score"`
 }
 
 func (s *Server) allNil() bool {
